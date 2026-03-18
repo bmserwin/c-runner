@@ -35,15 +35,15 @@ app.post('/run', (req, res) => {
             return res.status(500).json({ error: "Failed to create source file" });
         }
 
-        const startTime = performance.now();
-
         // 2. Compile the C code
         exec(`gcc "${sourceFile}" -o "${outputFile}"`, (compileError, stdout, stderr) => {
             if (compileError) {
                 // Cleanup source file
-                fs.unlinkSync(sourceFile);
+                if (fs.existsSync(sourceFile)) fs.unlinkSync(sourceFile);
                 return res.json({ error: stderr || "Compilation failed" });
             }
+
+            const startTime = performance.now();
 
             // 3. Execute the compiled program
             const child = spawn(outputFile);
@@ -53,15 +53,17 @@ app.post('/run', (req, res) => {
 
             // Handle timeout for infinite loops
             const timeout = setTimeout(() => {
-                child.kill();
-                killed = true;
+                if (!child.killed) {
+                    child.kill();
+                    killed = true;
+                }
             }, 5000); // 5 second timeout
 
-            // Handle stdin if provided
+            // Handle stdin - ALWAYS end it so programs waiting for input don't hang
             if (input) {
                 child.stdin.write(input);
-                child.stdin.end();
             }
+            child.stdin.end();
 
             child.stdout.on('data', (data) => {
                 responseOutput += data.toString();
@@ -71,14 +73,21 @@ app.post('/run', (req, res) => {
                 responseError += data.toString();
             });
 
+            child.on('error', (err) => {
+                clearTimeout(timeout);
+                responseError = "Error executing the program: " + err.message;
+            });
+
             child.on('close', (code) => {
                 clearTimeout(timeout);
                 const endTime = performance.now();
                 const executionTime = (endTime - startTime).toFixed(2);
 
                 // Cleanup files
-                if (fs.existsSync(sourceFile)) fs.unlinkSync(sourceFile);
-                if (fs.existsSync(outputFile)) fs.unlinkSync(outputFile);
+                setTimeout(() => {
+                    if (fs.existsSync(sourceFile)) fs.unlinkSync(sourceFile);
+                    if (fs.existsSync(outputFile)) fs.unlinkSync(outputFile);
+                }, 100);
 
                 if (killed) {
                     return res.json({ error: "Execution timed out (5s)" });
