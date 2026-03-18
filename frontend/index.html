@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>C-Cloud | Online C Compiler</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
+    <!-- Ace Editor -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ace/1.15.0/ace.js" type="text/javascript" charset="utf-8"></script>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">
+                <span class="symbol">#</span> C-Cloud <span class="badge">Online Compiler</span>
+            </div>
+            <div class="actions">
+                <button id="runBtn" class="btn btn-primary">
+                    <span class="icon">▶</span> Run Code
+                </button>
+            </div>
+        </header>
+
+        <main>
+            <div class="editor-section">
+                <div class="tab-header">
+                    <span class="tab active">program.c</span>
+                </div>
+                <div id="editor">#include &lt;stdio.h&gt;
+
+int main() {
+    printf("Hello, World!\\n");
+    return 0;
+}</div>
+            </div>
+
+            <div class="sidebar">
+                <div class="input-section">
+                    <div class="section-title">Standard Input (stdin)</div>
+                    <textarea id="stdin" placeholder="Enter values to be read by scanf..."></textarea>
+                </div>
+                <div class="output-section">
+                    <div class="section-title">Console Output <span id="time-badge" class="time-badge"></span></div>
+                    <div id="terminal" class="terminal-content">
+                        <span class="placeholder">Click "Run Code" to see the output here...</span>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
